@@ -5,12 +5,14 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ViewerComponent } from './viewer/viewer.component';
 import { AnnotoolsComponent } from './annotools/annotools.component';
+import { CommentsComponent } from './comments/comments.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     ViewerComponent,
-    AnnotoolsComponent
+    AnnotoolsComponent,
+    CommentsComponent
   ],
   imports: [
     BrowserModule,
