@@ -30,6 +30,7 @@ loadScript(name: string) {
             resolve({script: name, loaded: true, status: 'Already Loaded'});
         }
         else {
+            console.log("/////////////" + name);
             //load script
             let script = document.createElement('script');
             script.type = 'text/javascript';

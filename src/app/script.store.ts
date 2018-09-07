@@ -4,6 +4,6 @@ interface Scripts {
 }  
 export const ScriptStore: Scripts[] = [
     {name: 'pdfjs', src: "/src/assets/pdf.js"},
-    {name: 'pdfviewer', src: "/src/assets/pdf_viewer.js"},
-    {name: 'indexjs', src: "/src/assets/index.js"},
+    {name: 'pdfviewer', src: "/src/assets/shared/pdf_viewer.js"},
+    {name: 'indexjs', src: "/src/assets/index.js"}
 ];
