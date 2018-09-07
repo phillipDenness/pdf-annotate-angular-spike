@@ -3,7 +3,8 @@ interface Scripts {
     src: string;
 }  
 export const ScriptStore: Scripts[] = [
-    {name: 'pdfjs', src: "/src/assets/pdf.js"},
-    {name: 'pdfviewer', src: "/src/assets/shared/pdf_viewer.js"},
-    {name: 'indexjs', src: "/src/assets/index.js"}
+
+    {name: 'pdfjs', src: "assets/shared/pdf.js"},
+    {name: 'pdfviewer', src: "assets/shared/pdf_viewer.js"},
+    {name: 'indexjs', src: "assets/index.js"}
 ];
