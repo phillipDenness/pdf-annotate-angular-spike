@@ -1,23 +1,21 @@
-import { Component, OnInit, AfterViewInit, ElementRef, Inject} from '@angular/core';
-import { DOCUMENT } from '@angular/common';
-import { PDFAnnotations, PDFAnnotationData } from 'pdfjs-dist';
-import * as PDFANNO from 'assets/pdf-annotate';
-
+import { Component, OnInit, Inject} from '@angular/core';
+import { ScriptService } from '../script.service'
 
 @Component({
   selector: 'app-viewer',
   templateUrl: './viewer.component.html',
-  styleUrls: ['./viewer.component.scss']
+  styleUrls: ['./viewer.component.scss'],
+  providers: [ScriptService]
 })
 export class ViewerComponent implements OnInit {
-  data: PDFAnnotationData;
   
-  constructor(pDFAnnotations:PDFAnnotations) { 
-    this.data = pDFAnnotations.getData();
+  constructor(@Inject(ScriptService) private scriptService) {
   }
 
   ngOnInit() {
-    
+    this.scriptService.load('pdfjs', 'pdfviewer', 'indexjs').then(data => {
+      console.log('script loaded ', data);
+    }).catch(error => console.log(error));
   }
 }
 
