@@ -10,18 +10,21 @@ import { ScriptService } from '../script.service'
 export class ViewerComponent implements OnInit {
   
   constructor(@Inject(ScriptService) private scriptService) {
-    this.scriptService.load('pdfviewer', 'pdfjs').then(data => {
-      console.log('script loaded ', data);
-      this.scriptService.loadScript('indexjs').then(data => {
-        console.log('script loaded ', data);
-      }).catch(error => console.log(error));
-    }).catch(error => console.log(error));
-
-
+    this.scriptService.load('pdfviewer', 'pdfjs')
+    .then(data => {
+      console.log('script loaded ', data)
+    })
+    .then(data => {
+      this.scriptService.load('indexjs').then(data => {
+        console.log('script loaded ', data)
+      })
+    })
+    .catch(err => {
+      err => console.log(err)
+    });
   }
 
   ngOnInit() {
-
   }
 }
 
