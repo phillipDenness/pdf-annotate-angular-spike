@@ -225,31 +225,48 @@
 		}
 
 		function addHighlightedCommentStyle(linkedAnnotationId) {
-			var container = document.querySelector('#pageContainer1 .annotationLayer');
-			var annotations = container.getElementsByTagName('g');
+			var annotations = document.querySelector('#pageContainer1 .annotationLayer').childNodes;
 
-			for (var i = 0; i < annotations.length; i++) {
-				annotations[i].classList.remove("comment-selected");
-				var annotationId = annotations[i].dataset.pdfAnnotateId;
+			annotations.forEach(function(annotation) {
+				annotation.classList.remove("comment-selected");
+				var annotationId = annotation.dataset.pdfAnnotateId;
 
 				if (annotationId === linkedAnnotationId) {
-					annotations[i].classList.add("comment-selected");
+					annotation.classList.add("comment-selected");
 				}
-			}
+			})
 		}
 
-		document.querySelector('#content-wrapper').addEventListener('click', showAllComments);
+		document.querySelector('#content-wrapper').addEventListener('click', function(event) {
+			var pageNumber = getClickedPage(event);
+			showAllComments(pageNumber);
+		});
+
+		function getClickedPage(event) {
+			// console.log(UI.pdfViewer.currentPageNumber) 
+			var currentParent = event.target;
+			for (var step = 0; step < 5; step++) {
+				var pageNumber = currentParent.parentNode.getAttribute('data-page-number');
+				if (pageNumber != null) {
+					break;
+				};
+				currentParent = currentParent.parentNode;
+			}
+			return pageNumber;
+		}
+
 		document.querySelector('#comment-wrapper .comment-list-container').addEventListener('click', handleCommentClick);
 
 	  var commentList = document.querySelector('#comment-wrapper .comment-list-container');
 	  var commentForm = document.querySelector('#comment-wrapper .comment-list-form');
 		var commentText = commentForm.querySelector('input[type="text"]');
 		
-		showAllComments();
-		function showAllComments() {
+		showAllComments(1);
+		function showAllComments(pageNumber) {
+			document.querySelector('#comment-header').innerHTML= "Comments: Page " + pageNumber;
 			commentList.innerHTML = '';
 			
-			_2.default.getStoreAdapter().getAnnotations(documentId, 1).then(function(pageData) {
+			_2.default.getStoreAdapter().getAnnotations(documentId, parseInt(pageNumber)).then(function(pageData) {
 				pageData.annotations.forEach(function(annotation) {
 					displayAnnotationComments(annotation.uuid);
 				});
