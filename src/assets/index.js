@@ -209,15 +209,19 @@
 	(function (window, document) {
 
 		function handleCommentClick (event) {
-			var listItems = document.querySelector('#comment-wrapper .comment-list-container').childNodes;
-			listItems.forEach(function(item) {
-				item.classList.remove("comment-selected");
-			})
+			removeCommentSelectedStyle();
 			
 			var linkedAnnotationId = event.target.getAttribute('data-linked-annotation');
 			event.target.classList.add("comment-selected");
 
 			addHighlightedCommentStyle(linkedAnnotationId);
+		}
+
+		function removeCommentSelectedStyle() {
+			var listItems = document.querySelector('#comment-wrapper .comment-list-container').childNodes;
+			listItems.forEach(function(item) {
+				item.classList.remove("comment-selected");
+			});
 		}
 
 		function addHighlightedCommentStyle(linkedAnnotationId) {
@@ -244,6 +248,7 @@
 		showAllComments();
 		function showAllComments() {
 			commentList.innerHTML = '';
+			
 			_2.default.getStoreAdapter().getAnnotations(documentId, 1).then(function(pageData) {
 				pageData.annotations.forEach(function(annotation) {
 					displayAnnotationComments(annotation.uuid);
@@ -265,12 +270,32 @@
 	  }
 
 	  function insertComment(comment, annotationId) {
-	    var child = document.createElement('div');
-			child.className = 'comment-list-item';
-			child.setAttribute("data-linked-annotation", annotationId);
-	    child.innerHTML = _twitterText2.default.autoLink(_twitterText2.default.htmlEscape(comment.content));
+	    var commentText = document.createElement('div');
+			commentText.className = 'comment-list-item';
+			commentText.setAttribute("data-linked-annotation", annotationId);
+	    commentText.innerHTML = _twitterText2.default.autoLink(_twitterText2.default.htmlEscape(comment.content));
 
-			commentList.appendChild(child);			
+			var commentTools = document.createElement('div');
+			var editCommentButton = document.createElement('button');
+			editCommentButton.innerHTML = "edit";
+			editCommentButton.addEventListener ("click", function() {
+				alert("did something");
+			});
+
+			var deleteCommentButton = document.createElement('button');
+			deleteCommentButton.innerHTML = "delete";
+			deleteCommentButton.addEventListener ("click", function() {
+				_2.default.getStoreAdapter().deleteComment(documentId, comment.commentId).then(() => {
+					console.log('deleted');
+				}, (error) => {
+					console.log(error.message);
+				});
+			});
+
+			commentTools.appendChild(deleteCommentButton);
+			commentTools.appendChild(editCommentButton);
+			commentText.appendChild(commentTools);
+			commentList.appendChild(commentText);			
 	  }
 
 	  function handleAnnotationClick(target) {
@@ -306,8 +331,9 @@
 	    if (supportsComments(target)) {
 	      commentList.innerHTML = '';
 	      commentForm.style.display = 'none';
-	      commentForm.onsubmit = null;
-
+				commentForm.onsubmit = null;
+				
+				addHighlightedCommentStyle();
 	      insertComment({ content: 'No comments' });
 	    }
 	  }
