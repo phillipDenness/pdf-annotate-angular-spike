@@ -116,7 +116,7 @@
 	      var viewport = pdfPage.getViewport(RENDER_OPTIONS.scale, RENDER_OPTIONS.rotate);
 	      PAGE_HEIGHT = viewport.height;
 	    });
-	  });
+		});
 	}
 	render();
 
@@ -207,6 +207,36 @@
 
 	// Comment stuff
 	(function (window, document) {
+
+		function handleCommentClick (event) {
+			var listItems = document.querySelector('#comment-wrapper .comment-list-container').childNodes;
+			listItems.forEach(function(item) {
+				item.classList.remove("comment-selected");
+			})
+			
+			var linkedAnnotationId = event.target.getAttribute('data-linked-annotation');
+			event.target.classList.add("comment-selected");
+
+			addHighlightedCommentStyle(linkedAnnotationId);
+		}
+
+		function addHighlightedCommentStyle(linkedAnnotationId) {
+			var container = document.querySelector('#pageContainer1 .annotationLayer');
+			var annotations = container.getElementsByTagName('g');
+
+			for (var i = 0; i < annotations.length; i++) {
+				annotations[i].classList.remove("comment-selected");
+				var annotationId = annotations[i].dataset.pdfAnnotateId;
+
+				if (annotationId === linkedAnnotationId) {
+					annotations[i].classList.add("comment-selected");
+				}
+			}
+		}
+
+		document.querySelector('#content-wrapper').addEventListener('click', showAllComments);
+		document.querySelector('#comment-wrapper .comment-list-container').addEventListener('click', handleCommentClick);
+
 	  var commentList = document.querySelector('#comment-wrapper .comment-list-container');
 	  var commentForm = document.querySelector('#comment-wrapper .comment-list-form');
 		var commentText = commentForm.querySelector('input[type="text"]');
@@ -214,23 +244,17 @@
 		showAllComments();
 		function showAllComments() {
 			commentList.innerHTML = '';
-
 			_2.default.getStoreAdapter().getAnnotations(documentId, 1).then(function(pageData) {
 				pageData.annotations.forEach(function(annotation) {
-					console.log(annotation);
-
 					displayAnnotationComments(annotation.uuid);
-
-
-
 				});
 			});
 		}
-		function displayAnnotationComments(annotationUuid) {
-			_2.default.getStoreAdapter().getComments(documentId, annotationUuid).then(function (comments) {
+
+		function displayAnnotationComments(annotationId) {
+			_2.default.getStoreAdapter().getComments(documentId, annotationId).then(function (comments) {
 				comments.forEach(function (comment) {
-					console.log(comment);
-					insertComment(comment);	
+					insertComment(comment, annotationId);	
 				})
 			});
 		}
@@ -240,9 +264,10 @@
 	    return ['point', 'highlight', 'area'].indexOf(type) > -1;
 	  }
 
-	  function insertComment(comment) {
+	  function insertComment(comment, annotationId) {
 	    var child = document.createElement('div');
-	    child.className = 'comment-list-item';
+			child.className = 'comment-list-item';
+			child.setAttribute("data-linked-annotation", annotationId);
 	    child.innerHTML = _twitterText2.default.autoLink(_twitterText2.default.htmlEscape(comment.content));
 
 			commentList.appendChild(child);			
@@ -253,7 +278,7 @@
 	      (function () {
 	        var documentId = target.parentNode.getAttribute('data-pdf-annotate-document');
 	        var annotationId = target.getAttribute('data-pdf-annotate-id');
-					
+					addHighlightedCommentStyle(annotationId);
 
 	        _2.default.getStoreAdapter().getComments(documentId, annotationId).then(function (comments) {
 	          commentList.innerHTML = '';
@@ -271,8 +296,7 @@
 
 	            return false;
 	          };
-						// console.log(insertComment);
-	          comments.forEach(insertComment);
+	          comments.forEach(insertComment, annotationId);
 	        });
 	      })();
 	    }

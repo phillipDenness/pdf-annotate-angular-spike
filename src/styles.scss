@@ -45,7 +45,7 @@ body {
   
   #comment-wrapper {
     position: absolute;
-    margin-right: 260px;
+    margin-right: 270px;
     top: 35px;
     right: 0;
     bottom: 0;
@@ -87,6 +87,10 @@ body {
   #comment-wrapper .comment-list-form input {
     padding: 5px;
     width: 100%;
+  }
+
+  #comment-wrapper .comment-selected {
+    background-color: #eff
   }
   .pdfViewer .page {
     border-image: none;
@@ -226,6 +230,12 @@ body {
     cursor: pointer;
   }
   
+
+  .annotationLayer .comment-selected {
+    fill: rgb(0, 100, 0);
+    fill-opacity: 0.2;
+  }
+
   .pdfViewer .canvasWrapper {
     overflow: hidden;
   }
