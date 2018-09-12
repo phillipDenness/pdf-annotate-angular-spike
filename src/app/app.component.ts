@@ -1,6 +1,5 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/platform-browser';
-import { ScriptService } from './script.service';
 
 declare var PDFJS: any;
 declare var PDFAnnotate: any;
@@ -8,31 +7,17 @@ declare var PDFAnnotate: any;
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss'],
-  providers: [ScriptService]
+  styleUrls: ['./app.component.scss']
 })
 
 export class AppComponent implements OnInit {
   
-  constructor(@Inject(DOCUMENT) private document: Document, @Inject(ScriptService) private scriptService) {
-    // this.scriptService.load('pdfviewer', 'pdfjs')
-    // .then(data => {
-    //   console.log('script loaded ', data)
-    // })
-    // .then(data => {
-    //   this.scriptService.load('indexjs').then(data => {
-    //     console.log('script loaded ', data)
-    //   })
-    // })
-    // .catch(err => {
-    //   err => console.log(err)
-    // });
+  constructor(@Inject(DOCUMENT) private document: Document) {
   }
 
   ngOnInit() {
     var UI = PDFAnnotate.UI;
     var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
 
     var documentId = '/assets/example.pdf';
     var PAGE_HEIGHT = void 0;
@@ -44,7 +29,8 @@ export class AppComponent implements OnInit {
     };
     
     PDFAnnotate.setStoreAdapter(new PDFAnnotate.LocalStoreAdapter());
-    PDFJS.workerSrc = '../assets/shared/pdf.worker.js';
+    // PDFJS.disableWorker = true;
+    PDFJS.workerSrc = '/assets/shared/pdf.worker.js';
     var NUM_PAGES = 0;
   
     let renderedPages = {};
@@ -101,79 +87,9 @@ export class AppComponent implements OnInit {
 	}
   render();
 
-  	// Toolbar buttons
-	(function () {
-	  var tooltype = localStorage.getItem(RENDER_OPTIONS.documentId + '/tooltype') || 'cursor';
-	  if (tooltype) {
-	    setActiveToolbarItem(tooltype, document.querySelector('.toolbar button[data-tooltype=' + tooltype + ']'));
-	  }
-
-	  function setActiveToolbarItem(type, button) {
-	    var active = document.querySelector('.toolbar button.active');
-	    if (active) {
-	      active.classList.remove('active');
-
-	      switch (tooltype) {
-	        case 'cursor':
-	          UI.disableEdit();
-	          break;
-	        case 'draw':
-	          UI.disablePen();
-	          break;
-	        case 'text':
-	          UI.disableText();
-	          break;
-	        case 'point':
-	          UI.disablePoint();
-	          break;
-	        case 'area':
-	        case 'highlight':
-	        case 'strikeout':
-	          UI.disableRect();
-	          break;
-	      }
-	    }
-
-	    if (button) {
-	      button.classList.add('active');
-	    }
-	    if (tooltype !== type) {
-	      localStorage.setItem(RENDER_OPTIONS.documentId + '/tooltype', type);
-	    }
-	    tooltype = type;
-
-	    switch (type) {
-	      case 'cursor':
-	        UI.enableEdit();
-	        break;
-	      case 'draw':
-	        UI.enablePen();
-	        break;
-	      case 'text':
-	        UI.enableText();
-	        break;
-	      case 'point':
-	        UI.enablePoint();
-	        break;
-	      case 'area':
-	      case 'highlight':
-	      case 'strikeout':
-	        UI.enableRect(type);
-	        break;
-	    }
-	  }
-
-	  function handleToolbarClick(e) {
-	    if (e.target.nodeName === 'BUTTON') {
-	      setActiveToolbarItem(e.target.getAttribute('data-tooltype'), e.target);
-	    }
-	  }
-
-	  document.querySelector('.toolbar').addEventListener('click', handleToolbarClick);
-	})();
-
-	// Clear toolbar button
-	(function () {
+  // Clear toolbar button
+  loadClearToolbarButton();
+	function loadClearToolbarButton() {
 	  function handleClearClick(e) {
 	    if (confirm('Are you sure you want to clear annotations?')) {
 	      for (var i = 0; i < NUM_PAGES; i++) {
@@ -184,11 +100,11 @@ export class AppComponent implements OnInit {
 	    }
 	  }
 	  document.querySelector('a.clear').addEventListener('click', handleClearClick);
-	})();
+	};
 
-	// Comment stuff
-	(function (window, document) {
-
+  // Comment stuff
+  loadComments(this.document);
+	function loadComments (document) {
 		function handleCommentClick (event) {
 			removeCommentSelectedStyle();
 			
@@ -241,13 +157,26 @@ export class AppComponent implements OnInit {
 	  var commentList = document.querySelector('#comment-wrapper .comment-list-container');
 	  var commentForm = document.querySelector('#comment-wrapper .comment-list-form');
 		var commentText = commentForm.querySelector('input[type="text"]');
-		
+    
+    var lastKnownPage = 1;
+    document.getElementById('content-wrapper').addEventListener('scroll', function () {
+      let element = event.currentTarget as HTMLInputElement;
+      var visiblePageNum = Math.round(element.scrollTop / PAGE_HEIGHT - (PAGE_HEIGHT/3000)) + 1;
+      if (lastKnownPage != visiblePageNum) {
+        lastKnownPage = visiblePageNum;
+        showAllComments(visiblePageNum);
+      }
+    });
+
 		showAllComments(1);
 		function showAllComments(pageNumber) {
 			document.querySelector('#comment-header').innerHTML= "Comments: Page " + pageNumber;
 			commentList.innerHTML = '';
-			
-			PDFAnnotate.getStoreAdapter().getAnnotations(documentId, parseInt(pageNumber)).then(function(pageData) {
+      
+      console.log("annotation" + documentId);
+      PDFAnnotate.getStoreAdapter()
+      .getAnnotations(documentId, parseInt(pageNumber))
+      .then(function(pageData) {
 				pageData.annotations.forEach(function(annotation) {
 					displayAnnotationComments(annotation.uuid);
 				});
@@ -338,11 +267,78 @@ export class AppComponent implements OnInit {
 
 	  UI.addEventListener('annotation:click', handleAnnotationClick);
     UI.addEventListener('annotation:blur', handleAnnotationBlur);
-  });
+  };
 
-
-
-  }
-
+    // Toolbar buttons
+    loadToolBar();
+    function loadToolBar() {
+      var tooltype = localStorage.getItem(RENDER_OPTIONS.documentId + '/tooltype') || 'cursor';
+      if (tooltype) {
+        setActiveToolbarItem(tooltype, document.querySelector('.toolbar button[data-tooltype=' + tooltype + ']'));
+      }
   
+      function setActiveToolbarItem(type, button) {
+        var active = document.querySelector('.toolbar button.active');
+        if (active) {
+          active.classList.remove('active');
+  
+          switch (tooltype) {
+            case 'cursor':
+              UI.disableEdit();
+              break;
+            case 'draw':
+              UI.disablePen();
+              break;
+            case 'text':
+              UI.disableText();
+              break;
+            case 'point':
+              UI.disablePoint();
+              break;
+            case 'area':
+            case 'highlight':
+            case 'strikeout':
+              UI.disableRect();
+              break;
+          }
+        }
+  
+        if (button) {
+          button.classList.add('active');
+        }
+        if (tooltype !== type) {
+          localStorage.setItem(RENDER_OPTIONS.documentId + '/tooltype', type);
+        }
+        tooltype = type;
+  
+        switch (type) {
+          case 'cursor':
+            UI.enableEdit();
+            break;
+          case 'draw':
+            UI.enablePen();
+            break;
+          case 'text':
+            UI.enableText();
+            break;
+          case 'point':
+            UI.enablePoint();
+            break;
+          case 'area':
+          case 'highlight':
+          case 'strikeout':
+            UI.enableRect(type);
+            break;
+        }
+      }
+  
+      function handleToolbarClick(e) {
+        if (e.target.nodeName === 'BUTTON') {
+          setActiveToolbarItem(e.target.getAttribute('data-tooltype'), e.target);
+        }
+      }
+  
+      document.querySelector('.toolbar').addEventListener('click', handleToolbarClick);
+    };
+  }  
 }
