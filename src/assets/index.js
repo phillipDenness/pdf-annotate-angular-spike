@@ -73,6 +73,8 @@
 	  rotate: parseInt(localStorage.getItem(documentId + '/rotate'), 10) || 0
 	};
 
+	
+
 	_2.default.setStoreAdapter(new _2.default.LocalStoreAdapter());
 	PDFJS.workerSrc = '/assets/shared/pdf.worker.js';
 	// PDFJS.workerSrc = "(your path)/pdf.worker.js"

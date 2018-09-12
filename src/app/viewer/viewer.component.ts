@@ -1,31 +1,12 @@
-import { Component, OnInit, Inject} from '@angular/core';
-import { ScriptService } from '../script.service'
+import { Component} from '@angular/core';
 
 @Component({
   selector: 'app-viewer',
   templateUrl: './viewer.component.html',
-  styleUrls: ['./viewer.component.scss'],
-  providers: [ScriptService]
+  styleUrls: ['./viewer.component.scss']
 })
-export class ViewerComponent implements OnInit {
-  
-  constructor(@Inject(ScriptService) private scriptService) {
-    this.scriptService.load('pdfviewer', 'pdfjs')
-    .then(data => {
-      console.log('script loaded ', data)
-    })
-    .then(data => {
-      this.scriptService.load('indexjs').then(data => {
-        console.log('script loaded ', data)
-      })
-    })
-    .catch(err => {
-      err => console.log(err)
-    });
-  }
-
-  ngOnInit() {
-  }
+export class ViewerComponent {
+ 
 }
 
 
