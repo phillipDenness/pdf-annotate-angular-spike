@@ -30,6 +30,9 @@
               "src/styles.scss"
             ],
             "scripts": [
+              "src/assets/shared/pdf.js",
+              "src/assets/shared/pdf_viewer.js",
+              "src/assets/shared/pdf-annotate.js"
             ]
           },
           "configurations": {
